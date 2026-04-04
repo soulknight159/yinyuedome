@@ -1,0 +1,73 @@
+package cn.itcast.yinyue.service;
+
+import android.app.Service;
+import android.content.ComponentName;
+import android.content.ServiceConnection;
+import android.os.IBinder;
+
+public class ServiceConnectionManager<T extends Service> {
+
+    // 服务对象
+    private T service;
+    private boolean isServiceBound = false;
+
+    // 服务连接（封装好的 ServiceConnection）
+    private final ServiceConnection serviceConnection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder iBinder) {
+            // 安全强转通用 Binder
+            BaseServiceBinder<T> binder = (BaseServiceBinder<T>) iBinder;
+            service = binder.getService();
+            isServiceBound = true;
+
+            // 绑定成功回调
+            if (onServiceBindListener != null) {
+                onServiceBindListener.onServiceConnected(service);
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            isServiceBound = false;
+            service = null;
+
+            if (onServiceBindListener != null) {
+                onServiceBindListener.onServiceDisconnected();
+            }
+        }
+    };
+
+    // 回调接口
+    public interface OnServiceBindListener<S> {
+        void onServiceConnected(S service);
+        void onServiceDisconnected();
+    }
+
+    private OnServiceBindListener<T> onServiceBindListener;
+
+    public void setOnServiceBindListener(OnServiceBindListener<T> listener) {
+        this.onServiceBindListener = listener;
+    }
+
+    // 获取 ServiceConnection
+    public ServiceConnection getServiceConnection() {
+        return serviceConnection;
+    }
+
+    // 获取服务对象
+    public T getService() {
+        return service;
+    }
+
+    // 判断是否绑定
+    public boolean isServiceBound() {
+        return isServiceBound && service != null;
+    }
+
+    // 新增：解绑重置（防止内存泄漏）
+    public void release() {
+        service = null;
+        isServiceBound = false;
+        onServiceBindListener = null;
+    }
+}

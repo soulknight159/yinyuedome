@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- res/values/styles.xml -->
+    <style name="MyBottomNav" parent="Widget.Material3.BottomNavigationView">
+        <!-- 关键：在这里改 item 内边距 -->
+        <item name="itemPaddingTop">4dp</item>    <!-- 减少上内边距 -->
+        <item name="itemPaddingBottom">4dp</item> <!-- 减少下内边距 -->
+        <item name="itemIconSize">20dp</item>     <!-- 图标缩小 -->
+        <item name="android:minHeight">56dp</item>
+    </style>
+
+    <style name="MyNavText" parent="TextAppearance.Material3.LabelSmall">
+        <item name="android:textSize">12sp</item> <!-- 文字缩小 -->
+    </style>
+</resources>
