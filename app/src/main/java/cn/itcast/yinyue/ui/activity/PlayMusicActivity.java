@@ -40,14 +40,13 @@ public class PlayMusicActivity extends AppCompatActivity {
             return insets;
         });
 
-
         /**
-         * 初始化connectionManager
+         * 获取全局单例的ServiceConnectionManager
          * 绑定控件
          * 从Intent获取url和title
          * 设置标题
          */
-        connectionManager = new ServiceConnectionManager<>();
+        connectionManager = ServiceConnectionManager.getInstance();
 
         seekBar=findViewById(R.id.seekBar);
         play=findViewById(R.id.playOrStop);
@@ -101,7 +100,6 @@ public class PlayMusicActivity extends AppCompatActivity {
                 play.setOnClickListener(view1 -> {
                     if (service.getPlayState() == MusicService.IDLE){
                         service.playMusic(url);
-                        updateSeekBarHandler.post(updateSeekBarRunnable);
                     }
                     if (service.isPlaying()){
                         service.pauseMusic();   //暂停播放
@@ -150,20 +148,19 @@ public class PlayMusicActivity extends AppCompatActivity {
                 updateSeekBarHandler.postDelayed(this,100);
             }
         };
+        updateSeekBarHandler.post(updateSeekBarRunnable);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        Intent intent = new Intent(this, MusicService.class);
         // 使用封装好的 connection
-        bindService(intent, connectionManager.getServiceConnection(), BIND_AUTO_CREATE);
+        connectionManager.bindService(this, MusicService.class);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        unbindService(connectionManager.getServiceConnection());
     }
 
     @Override

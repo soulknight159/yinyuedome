@@ -3,7 +3,7 @@ import android.app.Service;
 import android.os.Binder;
 
 /**
- * 通用服务 Binder：可在任意 Service 中复用，完全解耦
+ * 通用服务 Binder
  * @param <T> 你的 Service 类型（自动泛型推导）
  */
 public class BaseServiceBinder<T extends Service> extends Binder {

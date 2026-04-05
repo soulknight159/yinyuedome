@@ -1,7 +1,10 @@
 package cn.itcast.yinyue.ui.activity;
 
 import android.Manifest;
+import android.app.Service;
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -11,6 +14,8 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.fragment.app.Fragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import cn.itcast.yinyue.service.MusicService;
+import cn.itcast.yinyue.service.ServiceConnectionManager;
 import cn.itcast.yinyue.ui.fragment.LocalMusicFragment;
 import cn.itcast.yinyue.ui.fragment.MineFragment;
 import cn.itcast.yinyue.ui.fragment.NetMusicFragment;
@@ -20,7 +25,7 @@ import cn.itcast.yinyue.R;
 
 
 public class MainActivity extends AppCompatActivity {
-
+    private static final String  TAG = "MainActivity";
     private final Fragment netMusicFragment = new NetMusicFragment();
     private final Fragment localMusicFragment = new LocalMusicFragment();
     private final Fragment mineFragment = new MineFragment();
@@ -29,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
             Manifest.permission.READ_MEDIA_AUDIO,
             Manifest.permission.INTERNET,
     };
+    private ServiceConnectionManager connectionManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+        connectionManager = ServiceConnectionManager.getInstance();
 
         PermissionUtils.requestPermissions(this, permissions, new PermissionCallback() {
             @Override
@@ -87,5 +94,19 @@ public class MainActivity extends AppCompatActivity {
             }
             return false;
         });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        try {
+            if (connectionManager != null) {
+                connectionManager.release();
+            }
+            Intent intent = new Intent(this, MusicService.class);
+            stopService(intent);
+        } catch (Exception e) {
+            Log.e(TAG, "onDestroy: ",e);
+        }
     }
 }
