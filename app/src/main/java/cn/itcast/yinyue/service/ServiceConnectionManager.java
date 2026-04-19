@@ -55,7 +55,7 @@ public class ServiceConnectionManager<T extends Service> {
             Intent intent = new Intent(context, serviceClass);
             // Android 8.0+ 启动前台服务（先启动再绑定，避免服务被回收）
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-//                context.startForegroundService(intent);
+                context.startForegroundService(intent);
             } else {
                 context.startService(intent);
             }

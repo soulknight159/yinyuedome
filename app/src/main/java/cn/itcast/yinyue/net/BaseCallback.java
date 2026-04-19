@@ -33,8 +33,8 @@ public abstract class BaseCallback<T> implements Callback<ApiResponse<T>> {
 
     @Override
     public void onFailure(Call<ApiResponse<T>> call, Throwable t) {
-        Log.e("BaseCallBack", "onFailure: ",t );
-        onError(t);
+//        Log.e("BaseCallBack", "onFailure: ",t );
+//        onError(t);
     }
 
     // 成功

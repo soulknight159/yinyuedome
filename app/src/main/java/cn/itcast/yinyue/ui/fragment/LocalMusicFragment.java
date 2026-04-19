@@ -2,6 +2,7 @@ package cn.itcast.yinyue.ui.fragment;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +22,7 @@ import cn.itcast.yinyue.ui.activity.PlayMusicActivity;
 
 
 public class LocalMusicFragment extends Fragment {
+    private static final String TAG = "localMusicFragment";
     List<Music> musicList;
     MusicListAdapter musicListAdapter;
     ListView musiclistView;
@@ -39,11 +41,9 @@ public class LocalMusicFragment extends Fragment {
         musicListAdapter = new MusicListAdapter(musicList, view.getContext());
         musiclistView.setAdapter(musicListAdapter);
         musiclistView.setOnItemClickListener((adapterView, view1, i, l) -> {
-            String url = musicList.get(i).getFileUrl();
-            String title = musicList.get(i).getTitle();
             Intent intent =new Intent(view.getContext(), PlayMusicActivity.class);
-            intent.putExtra("url",url);
-            intent.putExtra("title",title);
+            intent.putExtra("music",musicList.get(i));
+            Log.d(TAG, "listViewItemClick: "+ musicList.get(i).toString());
             startActivity(intent);
         });
     }

@@ -2,20 +2,28 @@ package cn.itcast.yinyue.ui.activity;
 
 import android.content.Intent;
 import android.media.MediaPlayer;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Message;
 import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 import cn.itcast.yinyue.R;
+import cn.itcast.yinyue.bean.Music;
+import cn.itcast.yinyue.consts.Consts;
 import cn.itcast.yinyue.service.MusicService;
 import cn.itcast.yinyue.service.ServiceConnectionManager;
 
@@ -23,6 +31,7 @@ public class PlayMusicActivity extends AppCompatActivity {
     TextView name;
     SeekBar seekBar;
     ImageButton play;
+    Music music;
     boolean isDragging = false;
     Handler updateSeekBarHandler=new Handler(Looper.getMainLooper());
     Runnable updateSeekBarRunnable;
@@ -53,9 +62,9 @@ public class PlayMusicActivity extends AppCompatActivity {
         name=findViewById(R.id.name);
 
         Intent intentData=getIntent();
-        String url = intentData.getStringExtra("url");
-        String title = intentData.getStringExtra("title");
-        name.setText(title);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            music = intentData.getSerializableExtra("music",Music.class);
+        }
 
         /**
          * 设置connectionManager的绑定监听器
@@ -73,19 +82,18 @@ public class PlayMusicActivity extends AppCompatActivity {
                 syncSeekBarProgress();
 
                 if(service.getPlayState() == MusicService.IDLE){
-                    service.playMusic(url);
+                    service.playMusic(music);
                 }
 
                 if (service.getPlayState() == MusicService.PLAYING |
                         service.getPlayState() == MusicService.PAUSED){
-                    if (service.getUrl() != null){
-                        if (!service.getUrl().equals(url)){
+                    if (service.getMusic() != null){
+                        if (!service.getMusic().equals(music)){
                             service.stopMusic();
-                            service.playMusic(url);
+                            service.playMusic(music);
                         }
                     }
                 }
-
 
                 /**
                  * 调用MusicService的方法设置MediaPlayer监听事件
@@ -116,8 +124,10 @@ public class PlayMusicActivity extends AppCompatActivity {
                 play.setOnClickListener(view1 -> {
                     if (service.isPlaying()){
                         service.pauseMusic();   //暂停播放
+//                        play.setImageResource(R.drawable.ic_play);
                     }else {
                         service.resumeMusic();  //继续播放
+//                        play.setImageResource(R.drawable.ic_pause);
                     }
                 });
 
@@ -157,8 +167,8 @@ public class PlayMusicActivity extends AppCompatActivity {
                         && !isDragging){
                     seekBar.setProgress(musicService.getCurrentPosition());
                 }
-                //延迟100ms循环运行
-                updateSeekBarHandler.postDelayed(this,100);
+                //延迟10ms循环运行
+                updateSeekBarHandler.postDelayed(this,10);
             }
         };
         updateSeekBarHandler.post(updateSeekBarRunnable);

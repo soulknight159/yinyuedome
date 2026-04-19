@@ -3,15 +3,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/nav_net_music"
-        android:icon="@drawable/ic_net_music"
+        android:icon="@drawable/ic_net_music_t"
         android:title="net" />
     <item
         
         android:id="@+id/nav_local_music"
-        android:icon="@drawable/ic_local_music"
+        android:icon="@drawable/ic_local_music_t"
         android:title="local" />
     <item
         android:id="@+id/nav_mine"
-        android:icon="@drawable/ic_mine"
+        android:icon="@drawable/ic_mine_t"
         android:title="mine" />
 </menu>

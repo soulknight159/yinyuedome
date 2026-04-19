@@ -1,21 +1,27 @@
 package cn.itcast.yinyue.service;
 
+import android.app.Notification;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.content.pm.ServiceInfo;
 import android.media.MediaPlayer;
-import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
 
 import java.io.IOException;
-import java.util.Objects;
+
+import cn.itcast.yinyue.bean.Music;
+import cn.itcast.yinyue.consts.Consts;
 
 public class MusicService extends Service {
     private static final String TAG = "MusicService";
     private final BaseServiceBinder<MusicService> binder = new BaseServiceBinder<>(this);
     MediaPlayer mediaPlayer;
-    String url;
+    Music music;
     OnMusicStateListener mStateListener;
+    NotificationHelper notificationHelper;
 
     public static final int IDLE = 0;     // 空闲
     public static final int PLAYING = 1;  // 播放中
@@ -36,13 +42,27 @@ public class MusicService extends Service {
         Log.d(TAG, "onCreate: MusicService");
         mediaPlayer = new MediaPlayer();
         initMediaPlayerListener();
+        // 创建音乐播放通知
+        notificationHelper = NotificationHelper.getInstance(this);
+        Notification notification = notificationHelper.createForegroundNotification(
+                "播放",
+                "正在播放:",
+                null
+        );
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            startForeground(
+                    Consts.FOREGROUND_NOTIFICATION_ID,
+                    notification,
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
+            );
+        } else {
+            // 旧版本
+            startForeground(Consts.FOREGROUND_NOTIFICATION_ID, notification);
+        }
     }
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         return super.onStartCommand(intent, flags, startId);
-    }
-    public String getUrl() {
-        return url;
     }
     public void setOnMusicStateListener(OnMusicStateListener listener) {
         this.mStateListener = listener;
@@ -60,6 +80,7 @@ public class MusicService extends Service {
         // 2. 准备完成
         mediaPlayer.setOnPreparedListener(mp -> {
             currentState = PLAYING;
+            Log.d(TAG, "initMediaPlayerListener:"+music.toString());
             mp.start();
             if (mStateListener != null) {
                 mStateListener.onPrepared(mp);
@@ -83,12 +104,21 @@ public class MusicService extends Service {
         });
     }
 
-    public void playMusic(String path) {
+    public void playMusic(Music music) {
         if (mediaPlayer == null) return;
         try {
             mediaPlayer.reset();
-            mediaPlayer.setDataSource(path);
-            url=path;
+            this.music = music;
+            Notification notification = notificationHelper.createForegroundNotification(
+                    music.getTitle(),
+                    "正在播放："+music.getTitle(),
+                    null);
+            notificationHelper.showNormalNotification(Consts.FOREGROUND_NOTIFICATION_ID, notification);
+            if (music.getFileUrl().startsWith("audio")){
+                mediaPlayer.setDataSource(Consts.BASE_URL + music.getFileUrl());
+            }else {
+                mediaPlayer.setDataSource(music.getFileUrl());
+            }
             mediaPlayer.prepareAsync();
         } catch (IOException e) {
             e.printStackTrace();
@@ -173,6 +203,11 @@ public class MusicService extends Service {
      */
     public int getPlayState() {
         return currentState;
+    }
+
+
+    public Music getMusic() {
+        return this.music;
     }
 
     /**

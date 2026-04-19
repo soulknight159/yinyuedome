@@ -30,13 +30,7 @@ public class GetMusicUtil {
                         cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST)));
                 song.setAlbum(cursor.getString(
                         cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM)));
-                String year = cursor.getString(
-                        cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.YEAR));
-                if (year != null && !year.isEmpty()) {
-                    song.setYear(year);
-                } else {
-                    song.setYear("未知");
-                }
+
                 long sizeByte = cursor.getLong(
                         cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE)
                 );

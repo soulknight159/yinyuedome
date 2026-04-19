@@ -5,6 +5,9 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ImageButton;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -30,11 +33,14 @@ public class MainActivity extends AppCompatActivity {
     private final Fragment localMusicFragment = new LocalMusicFragment();
     private final Fragment mineFragment = new MineFragment();
     private Fragment currentFragment = netMusicFragment;
+    ImageButton play;
     private String[] permissions = {
             Manifest.permission.READ_MEDIA_AUDIO,
             Manifest.permission.INTERNET,
+            Manifest.permission.FOREGROUND_SERVICE,
+            Manifest.permission.POST_NOTIFICATIONS
     };
-    private ServiceConnectionManager connectionManager;
+    private ServiceConnectionManager<MusicService> connectionManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,7 +52,22 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
         connectionManager = ServiceConnectionManager.getInstance();
+
+        play = findViewById(R.id.playOrStop);
+
+        play.setOnClickListener(view -> {
+            if (connectionManager.getService() != null &&
+                    connectionManager.isServiceBound()){
+                MusicService service = connectionManager.getService();
+                if (service.isPlaying()){
+                    service.pauseMusic();   //暂停播放
+                }else {
+                    service.resumeMusic();  //继续播放
+                }
+            }
+        });
 
         PermissionUtils.requestPermissions(this, permissions, new PermissionCallback() {
             @Override
@@ -113,7 +134,7 @@ public class MainActivity extends AppCompatActivity {
         try {
             if (connectionManager != null) {
                 connectionManager.unbindService(this);
-                connectionManager.release();
+//                connectionManager.release();
             }
 //            Intent intent = new Intent(this, MusicService.class);
 //            stopService(intent);

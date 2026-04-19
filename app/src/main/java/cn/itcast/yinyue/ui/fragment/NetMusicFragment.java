@@ -30,8 +30,6 @@ public class NetMusicFragment extends Fragment {
     TextView emptyText;
     MusicListAdapter musicListAdapter;
     List<Music> musicList = new ArrayList<>();
-    String url;
-    String title;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -68,11 +66,8 @@ public class NetMusicFragment extends Fragment {
         listView.setAdapter(musicListAdapter);
 
         listView.setOnItemClickListener((adapterView, view1, i, l) -> {
-            url = Consts.BASE_URL+Consts.AUDIO+musicList.get(i).getFileName();
-            title = musicList.get(i).getFileName();
             Intent intent =new Intent(view.getContext(), PlayMusicActivity.class);
-            intent.putExtra("url",url);
-            intent.putExtra("title",title);
+            intent.putExtra("music",musicList.get(i));
             startActivity(intent);
         });
     }
